@@ -1,0 +1,10 @@
+Package: rott
+Version: 
+Description: RetroGame port of Return of the Triad
+Section: emus
+Priority: optional
+Maintainer: scooterpsu
+Architecture: mipsel
+Homepage: https://github.com/scooterpsu/rott-rs97
+Depends:
+Source: https://github.com/scooterpsu/rott-rs97
