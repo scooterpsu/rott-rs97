@@ -120,4 +120,4 @@ ipk: $(target).dge
 	@tar --owner=0 --group=0 -czvf /tmp/.$(target)-ipk/control.tar.gz -C /tmp/.$(target)-ipk/ control conffiles
 	@tar --owner=0 --group=0 -czvf /tmp/.$(target)-ipk/data.tar.gz -C /tmp/.$(target)-ipk/root/ .
 	@echo 2.0 > /tmp/.$(target)-ipk/debian-binary
-	@ar r distrib/$(target).ipk /tmp/.$(target)-ipk/control.tar.gz /tmp/.$(target)-ipk/data.tar.gz /tmp/.$(target)-ipk/debian-binary
+	@ar r distrib/$(target)-shareware.ipk /tmp/.$(target)-ipk/control.tar.gz /tmp/.$(target)-ipk/data.tar.gz /tmp/.$(target)-ipk/debian-binary
