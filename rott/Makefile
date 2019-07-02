@@ -10,7 +10,13 @@ CPPFLAGS += -DSHAREWARE=$(SHAREWARE)
 CPPFLAGS += -DSUPERROTT=$(SUPERROTT)
 CPPFLAGS += -DSITELICENSE=$(SITELICENSE)
 
-ROTT ?= rott.elf
+
+target = rott
+
+section := $(shell sed -n distrib/control -e 's/^.*Section: //p')
+title := $(shell sed -n distrib/control -e 's/^.*Package: //p')
+description := $(shell sed -n distrib/control -e 's/^.*Description: //p')
+
 
 # Regular build flags and rules
 
@@ -88,9 +94,9 @@ OBJS += winrott.o
 
 AUDIOLIB := audiolib/audiolib.a
 
-all: $(ROTT)
+all: $(target).dge
 
-$(ROTT): $(OBJS) $(AUDIOLIB)
+$(target).dge: $(OBJS) $(AUDIOLIB)
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 $(OBJS): develop.h
@@ -99,18 +105,22 @@ $(AUDIOLIB):
 	$(MAKE) -C audiolib
 
 tidy: 
-	$(RM) $(OBJS) $(ROTT) $(ROTT).exe
+	$(RM) $(OBJS) $(ROTT) $(ROTT).dge
 
 clean: tidy
 	$(MAKE) -C audiolib $@
 
-ipk: $(ROTT)
-	@rm -rf /tmp/.rott-ipk/ && mkdir -p /tmp/.rott-ipk/root/home/retrofw/games/rott /tmp/.rott-ipk/root/home/retrofw/apps/gmenu2x/sections/games
-	@cp -r rott.elf game/rott.png game/DARKWAR.RTC game/DARKWAR.RTL game/conffiles game/DARKWAR.WAD game/control game/REMOTE1.RTS /tmp/.rott-ipk/root/home/retrofw/games/rott
-	@cp game/rott.lnk /tmp/.rott-ipk/root/home/retrofw/apps/gmenu2x/sections/games
-	@sed "s/^Version:.*/Version: $$(date +%Y%m%d)/" game/control > /tmp/.rott-ipk/control
-	@cp game/conffiles /tmp/.rott-ipk/
-	@tar --owner=0 --group=0 -czvf /tmp/.rott-ipk/control.tar.gz -C /tmp/.rott-ipk/ control conffiles
-	@tar --owner=0 --group=0 -czvf /tmp/.rott-ipk/data.tar.gz -C /tmp/.rott-ipk/root/ .
-	@echo 2.0 > /tmp/.rott-ipk/debian-binary
-	@ar r game/rott-retail.ipk /tmp/.rott-ipk/control.tar.gz /tmp/.rott-ipk/data.tar.gz /tmp/.rott-ipk/debian-binary
+
+ipk: $(target).dge
+	@rm -rf /tmp/.$(target)-ipk/ && mkdir -p /tmp/.$(target)-ipk/root/home/retrofw/$(section)/$(target) /tmp/.$(target)-ipk/root/home/retrofw/apps/gmenu2x/sections/$(section)
+	@cp -r $(target).dge distrib/files/* /tmp/.$(target)-ipk/root/home/retrofw/$(section)/$(target)
+	@echo title=$(title) > /tmp/.$(target)-ipk/root/home/retrofw/apps/gmenu2x/sections/$(section)/$(target).lnk
+	@echo description=$(description) >> /tmp/.$(target)-ipk/root/home/retrofw/apps/gmenu2x/sections/$(section)/$(target).lnk
+	@echo exec=/home/retrofw/$(section)/$(target)/$(target).dge >> /tmp/.$(target)-ipk/root/home/retrofw/apps/gmenu2x/sections/$(section)/$(target).lnk
+	@echo clock=600 >> /tmp/.$(target)-ipk/root/home/retrofw/apps/gmenu2x/sections/$(section)/$(target).lnk
+	@sed -e "s/^Version:.*/Version: $$(date +%Y%m%d)/" -e "s/^Section:.*/Section: $(section)/" distrib/control > /tmp/.$(target)-ipk/control
+	@echo /home/retrofw/apps/gmenu2x/sections/$(section)/$(target).lnk > /tmp/.$(target)-ipk/conffiles
+	@tar --owner=0 --group=0 -czvf /tmp/.$(target)-ipk/control.tar.gz -C /tmp/.$(target)-ipk/ control conffiles
+	@tar --owner=0 --group=0 -czvf /tmp/.$(target)-ipk/data.tar.gz -C /tmp/.$(target)-ipk/root/ .
+	@echo 2.0 > /tmp/.$(target)-ipk/debian-binary
+	@ar r distrib/$(target).ipk /tmp/.$(target)-ipk/control.tar.gz /tmp/.$(target)-ipk/data.tar.gz /tmp/.$(target)-ipk/debian-binary
